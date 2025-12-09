@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { getUserData } from '../utils/storage'
 import { calculateNutrition } from '../utils/calculations'
+import { loadMealPlannerDay, saveMealPlannerDay, loadMealPlannerTemplate, saveMealPlannerTemplate } from '../utils/mealPlannerStorage'
 import { 
   requestNotificationPermission, 
   scheduleAllWaterReminders,
@@ -25,8 +26,11 @@ function MealPlanner({ user }) {
   const [notificationStatus, setNotificationStatus] = useState(null)
 
   useEffect(() => {
-    loadDayData()
-    loadTargets()
+    const load = async () => {
+      await loadDayData()
+      await loadTargets()
+    }
+    load()
     
     // Verificar status de notificações
     if (canSendNotifications()) {
@@ -55,8 +59,8 @@ function MealPlanner({ user }) {
     return () => clearInterval(interval)
   }, [meals, waterGlasses, targets, notificationStatus])
 
-  const loadTargets = () => {
-    const data = getUserData(user)
+  const loadTargets = async () => {
+    const data = await getUserData(user)
     if (data) {
       const results = calculateNutrition(data)
       if (results && results.macros) {
@@ -71,42 +75,36 @@ function MealPlanner({ user }) {
     }
   }
 
-  const loadDayData = () => {
-    const key = `mealPlanner_${user}_${currentDate}`
-    const saved = localStorage.getItem(key)
-    if (saved) {
-      const data = JSON.parse(saved)
-      setMeals(data.meals || meals)
-      setWaterGlasses(data.waterGlasses || 0)
+  const loadDayData = async () => {
+    const dayData = await loadMealPlannerDay(user, currentDate)
+    if (dayData) {
+      setMeals(dayData.meals || meals)
+      setWaterGlasses(dayData.waterGlasses || 0)
     } else {
       // Carregar template padrão se não houver dados
-      loadDefaultMeals()
+      await loadDefaultMeals()
     }
   }
 
-  const loadDefaultMeals = () => {
-    const key = `mealPlanner_template_${user}`
-    const saved = localStorage.getItem(key)
-    if (saved) {
-      const template = JSON.parse(saved)
+  const loadDefaultMeals = async () => {
+    const template = await loadMealPlannerTemplate(user)
+    if (template) {
       setMeals(template.map(meal => ({ ...meal, checked: false })))
     }
   }
 
-  const saveDayData = () => {
-    const key = `mealPlanner_${user}_${currentDate}`
-    localStorage.setItem(key, JSON.stringify({
-      meals,
-      waterGlasses,
-      date: currentDate
-    }))
+  const saveDayData = async () => {
+    await saveMealPlannerDay(user, currentDate, meals, waterGlasses)
   }
 
-  const saveTemplate = () => {
-    const key = `mealPlanner_template_${user}`
+  const saveTemplate = async () => {
     const mealsWithoutChecked = meals.map(({ checked, ...rest }) => rest)
-    localStorage.setItem(key, JSON.stringify(mealsWithoutChecked))
-    alert('Dieta salva com sucesso!')
+    const result = await saveMealPlannerTemplate(user, mealsWithoutChecked)
+    if (result.success) {
+      alert('Dieta salva com sucesso!')
+    } else {
+      alert('Erro ao salvar dieta: ' + result.error)
+    }
   }
 
   const addMeal = () => {
@@ -122,8 +120,8 @@ function MealPlanner({ user }) {
     }
     setMeals([...meals, newMeal])
     // Salvar automaticamente
-    setTimeout(() => {
-      saveDayData()
+    setTimeout(async () => {
+      await saveDayData()
     }, 100)
   }
 
@@ -134,8 +132,8 @@ function MealPlanner({ user }) {
     }
     setMeals(meals.filter(meal => meal.id !== id))
     // Salvar automaticamente
-    setTimeout(() => {
-      saveDayData()
+    setTimeout(async () => {
+      await saveDayData()
     }, 100)
   }
 
@@ -171,7 +169,7 @@ function MealPlanner({ user }) {
     })
     setMeals(updatedMeals)
     // Salvar automaticamente
-    saveDayData()
+    saveDayData().catch(err => console.error('Erro ao salvar:', err))
   }
 
   const handleWaterGlass = () => {

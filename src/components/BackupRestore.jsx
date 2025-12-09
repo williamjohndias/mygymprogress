@@ -6,10 +6,15 @@ function BackupRestore({ user }) {
   const [restoreStatus, setRestoreStatus] = useState(null)
   const [showConfirm, setShowConfirm] = useState(false)
 
-  const handleDownload = () => {
-    downloadBackup(user)
-    setRestoreStatus({ success: true, message: 'Backup baixado com sucesso!' })
-    setTimeout(() => setRestoreStatus(null), 3000)
+  const handleDownload = async () => {
+    try {
+      await downloadBackup(user)
+      setRestoreStatus({ success: true, message: 'Backup baixado com sucesso!' })
+      setTimeout(() => setRestoreStatus(null), 3000)
+    } catch (error) {
+      setRestoreStatus({ success: false, message: 'Erro ao fazer backup: ' + error.message })
+      setTimeout(() => setRestoreStatus(null), 5000)
+    }
   }
 
   const handleFileSelect = (e) => {
@@ -21,7 +26,7 @@ function BackupRestore({ user }) {
       return
     }
 
-    restoreFromFile(file, user, (result) => {
+    restoreFromFile(file, user, async (result) => {
       setRestoreStatus(result)
       if (result.success) {
         setTimeout(() => {
@@ -33,13 +38,17 @@ function BackupRestore({ user }) {
     })
   }
 
-  const handleClear = () => {
+  const handleClear = async () => {
     if (window.confirm(`Tem certeza que deseja limpar TODOS os dados de ${user}? Esta ação não pode ser desfeita!`)) {
-      clearUserData(user)
-      setRestoreStatus({ success: true, message: 'Dados limpos com sucesso!' })
-      setTimeout(() => {
-        window.location.reload()
-      }, 2000)
+      const result = await clearUserData(user)
+      setRestoreStatus(result)
+      if (result.success) {
+        setTimeout(() => {
+          window.location.reload()
+        }, 2000)
+      } else {
+        setTimeout(() => setRestoreStatus(null), 5000)
+      }
     }
   }
 

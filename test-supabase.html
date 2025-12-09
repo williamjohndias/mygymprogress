@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste de Conexão Supabase</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        .test-result {
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        .success {
+            background: #10b981;
+        }
+        .error {
+            background: #ef4444;
+        }
+        button {
+            padding: 12px 24px;
+            background: #FFD700;
+            color: #000;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #ffed4e;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Teste de Conexão Supabase</h1>
+    <p>Clique no botão abaixo para testar a conexão com o Supabase:</p>
+    <button onclick="testConnection()">Testar Conexão</button>
+    <div id="result"></div>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+        
+        const SUPABASE_URL = 'https://cqnsrnavwpccnfiqzdvn.supabase.co'
+        const SUPABASE_SECRET_KEY = 'sb_secret_yuMlJrD_D2uMiDwVdORhkA_8mDlnMrW'
+        
+        const supabase = createClient(SUPABASE_URL, SUPABASE_SECRET_KEY, {
+            auth: {
+                autoRefreshToken: false,
+                persistSession: false
+            }
+        })
+
+        window.testConnection = async () => {
+            const resultDiv = document.getElementById('result')
+            resultDiv.innerHTML = '<p>Testando conexão...</p>'
+            
+            try {
+                // Teste 1: Verificar se consegue conectar
+                const { data, error } = await supabase.from('user_data').select('count').limit(1)
+                
+                if (error) {
+                    if (error.code === 'PGRST116' || error.message.includes('does not exist')) {
+                        resultDiv.innerHTML = `
+                            <div class="test-result success">
+                                <h3>✅ Conexão OK!</h3>
+                                <p>A conexão com o Supabase está funcionando.</p>
+                                <p><strong>Próximo passo:</strong> Execute o script SQL (supabase-schema.sql) no SQL Editor do Supabase para criar as tabelas.</p>
+                            </div>
+                        `
+                    } else {
+                        throw error
+                    }
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="test-result success">
+                            <h3>✅ Tudo funcionando!</h3>
+                            <p>Conexão estabelecida com sucesso.</p>
+                            <p>As tabelas já existem no banco de dados.</p>
+                        </div>
+                    `
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="test-result error">
+                        <h3>❌ Erro na Conexão</h3>
+                        <p><strong>Erro:</strong> ${error.message}</p>
+                        <p>Verifique:</p>
+                        <ul>
+                            <li>A URL está correta?</li>
+                            <li>A secret key está correta?</li>
+                            <li>O projeto Supabase está ativo?</li>
+                        </ul>
+                    </div>
+                `
+            }
+        }
+    </script>
+</body>
+</html>
+

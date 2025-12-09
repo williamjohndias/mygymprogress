@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { getUserData } from '../utils/storage'
 import { calculateNutrition } from '../utils/calculations'
+import { loadGoals, saveGoals } from '../utils/goalsStorage'
 import './Goals.css'
 
 function Goals({ user }) {
@@ -13,26 +14,31 @@ function Goals({ user }) {
   const [currentStats, setCurrentStats] = useState(null)
 
   useEffect(() => {
-    loadGoals()
-    loadCurrentStats()
+    const load = async () => {
+      await loadUserGoals()
+      await loadCurrentStats()
+    }
+    load()
   }, [user])
 
-  const loadGoals = () => {
-    const key = `goals_${user}`
-    const saved = localStorage.getItem(key)
-    if (saved) {
-      setGoals(JSON.parse(saved))
+  const loadUserGoals = async () => {
+    const savedGoals = await loadGoals(user)
+    if (savedGoals) {
+      setGoals(savedGoals)
     }
   }
 
-  const saveGoals = () => {
-    const key = `goals_${user}`
-    localStorage.setItem(key, JSON.stringify(goals))
-    alert('Metas salvas com sucesso!')
+  const handleSaveGoals = async () => {
+    const result = await saveGoals(user, goals)
+    if (result.success) {
+      alert('Metas salvas com sucesso!')
+    } else {
+      alert('Erro ao salvar metas: ' + result.error)
+    }
   }
 
-  const loadCurrentStats = () => {
-    const data = getUserData(user)
+  const loadCurrentStats = async () => {
+    const data = await getUserData(user)
     if (data) {
       const results = calculateNutrition(data)
       setCurrentStats({
@@ -136,7 +142,7 @@ function Goals({ user }) {
           />
         </div>
 
-        <button className="btn-primary" onClick={saveGoals}>
+        <button className="btn-primary" onClick={handleSaveGoals}>
           Salvar Metas
         </button>
       </div>

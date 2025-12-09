@@ -22,11 +22,14 @@ function App() {
   // Carregar dados do usuário quando selecionado
   useEffect(() => {
     if (currentUser) {
-      const data = getUserData(currentUser)
-      setUserData(data)
-      if (data && hasRequiredData(data)) {
-        calculateAndSetResults(data)
+      const loadData = async () => {
+        const data = await getUserData(currentUser)
+        setUserData(data)
+        if (data && hasRequiredData(data)) {
+          calculateAndSetResults(data)
+        }
       }
+      loadData()
     }
   }, [currentUser])
 
@@ -63,9 +66,9 @@ function App() {
     setCurrentView(view)
   }
 
-  const handleDataChange = (newData) => {
+  const handleDataChange = async (newData) => {
     setUserData(newData)
-    saveUserData(currentUser, newData)
+    await saveUserData(currentUser, newData)
     if (hasRequiredData(newData)) {
       calculateAndSetResults(newData)
     } else {
@@ -73,14 +76,14 @@ function App() {
     }
   }
 
-  const handleSaveCalculation = () => {
+  const handleSaveCalculation = async () => {
     if (results && currentUser) {
       const entry = {
         ...results,
         timestamp: new Date().toISOString(),
         userData: { ...userData }
       }
-      saveHistoryEntry(currentUser, entry)
+      await saveHistoryEntry(currentUser, entry)
       alert('Cálculo salvo no histórico!')
     }
   }

@@ -6,19 +6,22 @@ function History({ user, onBack }) {
   const [history, setHistory] = React.useState([])
 
   React.useEffect(() => {
-    const userHistory = getHistory(user)
-    setHistory(userHistory)
+    const loadHistory = async () => {
+      const userHistory = await getHistory(user)
+      setHistory(userHistory)
+    }
+    loadHistory()
   }, [user])
 
-  const handleDelete = (index) => {
+  const handleDelete = async (entryId) => {
     if (window.confirm('Tem certeza que deseja excluir este registro?')) {
-      const updatedHistory = deleteHistoryEntry(user, index)
+      const updatedHistory = await deleteHistoryEntry(user, entryId)
       setHistory(updatedHistory)
     }
   }
 
-  const handleExport = () => {
-    exportHistoryToCSV(user)
+  const handleExport = async () => {
+    await exportHistoryToCSV(user)
   }
 
   const formatDate = (timestamp) => {
@@ -62,10 +65,10 @@ function History({ user, onBack }) {
       </div>
 
       <div className="history-list">
-        {history.map((entry, index) => (
-          <div key={index} className="history-card">
+        {history.map((entry) => (
+          <div key={entry.id || entry.timestamp} className="history-card">
             <div className="history-card-header">
-              <h3>Registro #{history.length - index}</h3>
+              <h3>Registro #{entry.id || 'N/A'}</h3>
               <span className="history-date">{formatDate(entry.timestamp)}</span>
             </div>
             
@@ -181,7 +184,7 @@ function History({ user, onBack }) {
             <div className="history-card-footer">
               <button 
                 className="btn-delete"
-                onClick={() => handleDelete(index)}
+                onClick={() => handleDelete(entry.id)}
               >
                 Excluir
               </button>

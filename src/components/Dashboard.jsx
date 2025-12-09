@@ -35,18 +35,21 @@ function Dashboard({ user, onNavigate }) {
   const [chartFilter, setChartFilter] = useState('all') // all, week, month, 3months
 
   useEffect(() => {
-    const data = getUserData(user)
-    const hist = getHistory(user)
-    setCurrentData(data)
-    setHistory(hist.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp)))
-    
-    if (data) {
-      const results = calculateNutrition(data)
-      if (results && data.goal) {
-        const proj = calculateProjection(data, results)
-        setProjection(proj)
+    const loadData = async () => {
+      const data = await getUserData(user)
+      const hist = await getHistory(user)
+      setCurrentData(data)
+      setHistory(hist.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp)))
+      
+      if (data) {
+        const results = calculateNutrition(data)
+        if (results && data.goal) {
+          const proj = calculateProjection(data, results)
+          setProjection(proj)
+        }
       }
     }
+    loadData()
   }, [user])
 
   const getCurrentResults = () => {
