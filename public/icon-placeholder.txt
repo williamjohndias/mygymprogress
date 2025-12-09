@@ -1,0 +1,15 @@
+NOTA: Você precisa criar ícones para o PWA
+
+Crie duas imagens:
+- icon-192.png (192x192 pixels)
+- icon-512.png (512x512 pixels)
+
+Você pode usar qualquer editor de imagens ou gerador online:
+- https://realfavicongenerator.net/
+- https://www.pwabuilder.com/imageGenerator
+
+Coloque os arquivos na pasta /public/
+
+Para um ícone simples, você pode criar um quadrado dourado (#FFD700) 
+com um ícone de nutrição ou um "N" em preto no centro.
+

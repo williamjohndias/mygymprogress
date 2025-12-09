@@ -1,0 +1,54 @@
+.motivational-quote {
+  padding: 20px 24px;
+  text-align: center;
+  border-top: 1px solid rgba(255, 215, 0, 0.2);
+  border-bottom: 1px solid rgba(255, 215, 0, 0.2);
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.03) 0%, rgba(255, 140, 0, 0.02) 100%);
+  transition: opacity 0.3s ease;
+}
+
+.quote-content {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.quote-text {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+  font-style: italic;
+  margin-bottom: 12px;
+  letter-spacing: 0.3px;
+}
+
+.quote-author {
+  font-size: 0.9rem;
+  color: rgba(255, 215, 0, 0.8);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.fade-out {
+  opacity: 0;
+}
+
+.fade-in {
+  opacity: 1;
+}
+
+@media (max-width: 768px) {
+  .motivational-quote {
+    padding: 16px 20px;
+  }
+
+  .quote-text {
+    font-size: 1rem;
+  }
+
+  .quote-author {
+    font-size: 0.85rem;
+  }
+}
+
