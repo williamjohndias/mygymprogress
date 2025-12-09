@@ -8,11 +8,14 @@ export const loadGoals = async (user) => {
   try {
     const { data, error } = await supabase
       .from('goals')
-      .select('goal_data')
+      .select('*')
       .eq('user_id', user)
-      .single()
+      .maybeSingle()
 
-    if (error && error.code !== 'PGRST116') throw error
+    if (error) {
+      if (error.code === 'PGRST116') return null
+      throw error
+    }
     return data?.goal_data || null
   } catch (error) {
     console.error('Erro ao carregar metas:', error)

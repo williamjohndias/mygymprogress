@@ -1,23 +1,16 @@
 import { createClient } from '@supabase/supabase-js'
 
-// IMPORTANTE: Substitua pela URL do seu projeto Supabase
-// Você encontra isso em: https://app.supabase.com -> Seu Projeto -> Settings -> API
-const SUPABASE_URL = 'https://cqnsrnavwpccnfiqzdvn.supabase.co' // SUBSTITUA AQUI
-const SUPABASE_ANON_KEY = 'sua-anon-key-aqui' // Opcional, mas recomendado para produção
+// URL do projeto Supabase
+const SUPABASE_URL = 'https://cqnsrnavwpccnfiqzdvn.supabase.co'
 
-// Para operações administrativas, usamos a service_role key (secret key)
-// ATENÇÃO: Esta key deve ser mantida em segredo e nunca exposta no frontend em produção
-// Em produção, use Row Level Security (RLS) e a anon key
-const SUPABASE_SECRET_KEY = 'sb_secret_yuMlJrD_D2uMiDwVdORhkA_8mDlnMrW'
+// IMPORTANTE: Use a PUBLISHABLE KEY (não a secret key) no frontend!
+// A secret key não pode ser usada no navegador por segurança
+// Encontre em: Supabase -> Settings -> API -> Publishable key
+const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_WCQD9s3axKJUSKz5-_uSAw_ssyKFM8V'
 
-// Cliente Supabase com service_role (para operações administrativas)
-// Em produção, considere usar um backend para operações sensíveis
-export const supabase = createClient(SUPABASE_URL, SUPABASE_SECRET_KEY, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false
-  }
-})
+// Cliente Supabase com publishable key (para uso no frontend)
+// Esta key é segura para usar no navegador quando RLS está configurado
+export const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY)
 
 // Função para verificar conexão
 export const testConnection = async () => {

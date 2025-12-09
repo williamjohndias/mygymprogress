@@ -11,9 +11,12 @@ export const loadMealPlannerDay = async (user, date) => {
       .select('*')
       .eq('user_id', user)
       .eq('date', date)
-      .single()
+      .maybeSingle()
 
-    if (error && error.code !== 'PGRST116') throw error
+    if (error) {
+      if (error.code === 'PGRST116') return null
+      throw error
+    }
     
     if (data) {
       return {
@@ -60,11 +63,14 @@ export const loadMealPlannerTemplate = async (user) => {
   try {
     const { data, error } = await supabase
       .from('meal_planner_template')
-      .select('template')
+      .select('*')
       .eq('user_id', user)
-      .single()
+      .maybeSingle()
 
-    if (error && error.code !== 'PGRST116') throw error
+    if (error) {
+      if (error.code === 'PGRST116') return null
+      throw error
+    }
     return data?.template || null
   } catch (error) {
     console.error('Erro ao carregar template:', error)

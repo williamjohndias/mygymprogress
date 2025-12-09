@@ -49,14 +49,10 @@
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
         
         const SUPABASE_URL = 'https://cqnsrnavwpccnfiqzdvn.supabase.co'
-        const SUPABASE_SECRET_KEY = 'sb_secret_yuMlJrD_D2uMiDwVdORhkA_8mDlnMrW'
+        // IMPORTANTE: Use a Publishable key (não a secret key) no frontend
+        const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_WCQD9s3axKJUSKz5-_uSAw_ssyKFM8V'
         
-        const supabase = createClient(SUPABASE_URL, SUPABASE_SECRET_KEY, {
-            auth: {
-                autoRefreshToken: false,
-                persistSession: false
-            }
-        })
+        const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY)
 
         window.testConnection = async () => {
             const resultDiv = document.getElementById('result')
@@ -75,6 +71,22 @@
                                 <p><strong>Próximo passo:</strong> Execute o script SQL (supabase-schema.sql) no SQL Editor do Supabase para criar as tabelas.</p>
                             </div>
                         `
+                    } else if (error.message.includes('Forbidden use of secret')) {
+                        resultDiv.innerHTML = `
+                            <div class="test-result error">
+                                <h3>❌ Erro: Secret Key no Navegador</h3>
+                                <p>Você está usando a secret key no navegador. Use a <strong>Publishable key</strong> no frontend!</p>
+                                <p>Encontre em: Supabase → Settings → API → Publishable key</p>
+                            </div>
+                        `
+                    } else if (error.code === 'PGRST301' || error.message.includes('permission denied')) {
+                        resultDiv.innerHTML = `
+                            <div class="test-result error">
+                                <h3>❌ Erro: RLS Bloqueando</h3>
+                                <p>As políticas RLS estão bloqueando o acesso.</p>
+                                <p><strong>Solução:</strong> Execute o script SQL completo (supabase-schema.sql) no Supabase para criar as políticas.</p>
+                            </div>
+                        `
                     } else {
                         throw error
                     }
@@ -83,7 +95,7 @@
                         <div class="test-result success">
                             <h3>✅ Tudo funcionando!</h3>
                             <p>Conexão estabelecida com sucesso.</p>
-                            <p>As tabelas já existem no banco de dados.</p>
+                            <p>As tabelas já existem no banco de dados e as políticas RLS estão configuradas.</p>
                         </div>
                     `
                 }
@@ -92,11 +104,13 @@
                     <div class="test-result error">
                         <h3>❌ Erro na Conexão</h3>
                         <p><strong>Erro:</strong> ${error.message}</p>
+                        <p><strong>Código:</strong> ${error.code || 'N/A'}</p>
                         <p>Verifique:</p>
                         <ul>
                             <li>A URL está correta?</li>
-                            <li>A secret key está correta?</li>
+                            <li>A Publishable key está correta?</li>
                             <li>O projeto Supabase está ativo?</li>
+                            <li>As políticas RLS foram criadas? (Execute o SQL)</li>
                         </ul>
                     </div>
                 `

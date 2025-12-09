@@ -13,7 +13,8 @@ export const saveUserData = async (user, data) => {
         data: data,
         updated_at: new Date().toISOString()
       }, {
-        onConflict: 'user_id'
+        onConflict: 'user_id',
+        ignoreDuplicates: false
       })
 
     if (error) throw error
@@ -31,11 +32,15 @@ export const getUserData = async (user) => {
   try {
     const { data, error } = await supabase
       .from('user_data')
-      .select('data')
+      .select('*')
       .eq('user_id', user)
-      .single()
+      .maybeSingle()
 
-    if (error && error.code !== 'PGRST116') throw error
+    if (error) {
+      // PGRST116 = nenhum resultado encontrado (OK)
+      if (error.code === 'PGRST116') return null
+      throw error
+    }
     return data?.data || null
   } catch (error) {
     console.error('Erro ao carregar dados do usuário:', error)

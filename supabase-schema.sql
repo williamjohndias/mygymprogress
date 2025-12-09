@@ -104,3 +104,40 @@ COMMENT ON TABLE meal_planner IS 'Planejamento de refeições diário por usuár
 COMMENT ON TABLE meal_planner_template IS 'Templates de refeições salvos por usuário';
 COMMENT ON TABLE goals IS 'Metas personalizadas por usuário';
 
+-- IMPORTANTE: Configurar Row Level Security (RLS) para permitir acesso com anon key
+-- Como é um app pessoal com apenas 2 usuários fixos, vamos permitir acesso total
+-- Em produção, considere políticas mais restritivas
+
+-- Habilitar RLS
+ALTER TABLE user_data ENABLE ROW LEVEL SECURITY;
+ALTER TABLE history ENABLE ROW LEVEL SECURITY;
+ALTER TABLE macro_tracker ENABLE ROW LEVEL SECURITY;
+ALTER TABLE meal_planner ENABLE ROW LEVEL SECURITY;
+ALTER TABLE meal_planner_template ENABLE ROW LEVEL SECURITY;
+ALTER TABLE goals ENABLE ROW LEVEL SECURITY;
+
+-- Criar políticas que permitem acesso total (app pessoal)
+-- Para user_data
+CREATE POLICY "Allow all operations on user_data" ON user_data
+  FOR ALL USING (true) WITH CHECK (true);
+
+-- Para history
+CREATE POLICY "Allow all operations on history" ON history
+  FOR ALL USING (true) WITH CHECK (true);
+
+-- Para macro_tracker
+CREATE POLICY "Allow all operations on macro_tracker" ON macro_tracker
+  FOR ALL USING (true) WITH CHECK (true);
+
+-- Para meal_planner
+CREATE POLICY "Allow all operations on meal_planner" ON meal_planner
+  FOR ALL USING (true) WITH CHECK (true);
+
+-- Para meal_planner_template
+CREATE POLICY "Allow all operations on meal_planner_template" ON meal_planner_template
+  FOR ALL USING (true) WITH CHECK (true);
+
+-- Para goals
+CREATE POLICY "Allow all operations on goals" ON goals
+  FOR ALL USING (true) WITH CHECK (true);
+

@@ -31,16 +31,16 @@ export const exportUserData = async (user) => {
     // Coletar template de refeições
     const { data: templateData } = await supabase
       .from('meal_planner_template')
-      .select('template')
+      .select('*')
       .eq('user_id', user)
-      .single()
+      .maybeSingle()
 
     // Coletar metas
     const { data: goalsData } = await supabase
       .from('goals')
-      .select('goal_data')
+      .select('*')
       .eq('user_id', user)
-      .single()
+      .maybeSingle()
 
     const exportData = {
       user,

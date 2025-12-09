@@ -10,15 +10,18 @@ function UserSelector({ onSelect }) {
   const [dayHistory, setDayHistory] = useState([])
 
   useEffect(() => {
-    const liam = getUserData('Liam')
-    const day = getUserData('Day')
-    const liamHist = getHistory('Liam')
-    const dayHist = getHistory('Day')
-    
-    setLiamData(liam)
-    setDayData(day)
-    setLiamHistory(liamHist)
-    setDayHistory(dayHist)
+    const loadData = async () => {
+      const liam = await getUserData('Liam')
+      const day = await getUserData('Day')
+      const liamHist = await getHistory('Liam')
+      const dayHist = await getHistory('Day')
+      
+      setLiamData(liam)
+      setDayData(day)
+      setLiamHistory(liamHist)
+      setDayHistory(dayHist)
+    }
+    loadData()
   }, [])
 
   const getLastWeight = (user) => {
