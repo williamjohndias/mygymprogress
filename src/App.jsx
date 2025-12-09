@@ -4,7 +4,6 @@ import Dashboard from './components/Dashboard'
 import DataInput from './components/DataInput'
 import Results from './components/Results'
 import History from './components/History'
-import MacroTracker from './components/MacroTracker'
 import MealPlanner from './components/MealPlanner'
 import BackupRestore from './components/BackupRestore'
 import Goals from './components/Goals'
@@ -17,7 +16,7 @@ function App() {
   const [currentUser, setCurrentUser] = useState(null)
   const [userData, setUserData] = useState(null)
   const [results, setResults] = useState(null)
-  const [currentView, setCurrentView] = useState('dashboard') // dashboard, input, history, tracker, planner, backup, goals
+  const [currentView, setCurrentView] = useState('dashboard') // dashboard, input, history, planner, backup, goals
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   // Carregar dados do usuário quando selecionado
@@ -172,16 +171,6 @@ function App() {
                 <span className="nav-text">Dados</span>
               </button>
               <button 
-                className={`nav-btn ${currentView === 'tracker' ? 'active' : ''}`}
-                onClick={() => {
-                  handleNavigate('tracker')
-                  setMobileMenuOpen(false)
-                }}
-              >
-                <span className="nav-icon">📈</span>
-                <span className="nav-text">Tracker</span>
-              </button>
-              <button 
                 className={`nav-btn ${currentView === 'planner' ? 'active' : ''}`}
                 onClick={() => {
                   handleNavigate('planner')
@@ -189,7 +178,7 @@ function App() {
                 }}
               >
                 <span className="nav-icon">🍽️</span>
-                <span className="nav-text">Refeições</span>
+                <span className="nav-text">Dieta</span>
               </button>
               <button 
                 className={`nav-btn ${currentView === 'history' ? 'active' : ''}`}
@@ -280,11 +269,6 @@ function App() {
                 </>
               )}
             </>
-          ) : currentView === 'tracker' ? (
-            <MacroTracker 
-              user={currentUser}
-              onNavigate={handleNavigate}
-            />
           ) : currentView === 'planner' ? (
             <MealPlanner 
               user={currentUser}

@@ -11,12 +11,12 @@ import './MealPlanner.css'
 
 function MealPlanner({ user }) {
   const [meals, setMeals] = useState([
-    { id: 1, name: 'Café da Manhã', time: '07:00', protein: '', carbs: '', fats: '', calories: '', checked: false },
-    { id: 2, name: 'Lanche da Manhã', time: '10:00', protein: '', carbs: '', fats: '', calories: '', checked: false },
-    { id: 3, name: 'Almoço', time: '12:30', protein: '', carbs: '', fats: '', calories: '', checked: false },
-    { id: 4, name: 'Lanche da Tarde', time: '16:00', protein: '', carbs: '', fats: '', calories: '', checked: false },
-    { id: 5, name: 'Jantar', time: '19:30', protein: '', carbs: '', fats: '', calories: '', checked: false },
-    { id: 6, name: 'Ceia', time: '22:00', protein: '', carbs: '', fats: '', calories: '', checked: false }
+    { id: 1, name: 'Refeição 1', time: '07:00', protein: '', carbs: '', fats: '', calories: '', checked: false },
+    { id: 2, name: 'Refeição 2', time: '10:00', protein: '', carbs: '', fats: '', calories: '', checked: false },
+    { id: 3, name: 'Refeição 3', time: '12:30', protein: '', carbs: '', fats: '', calories: '', checked: false },
+    { id: 4, name: 'Refeição 4', time: '16:00', protein: '', carbs: '', fats: '', calories: '', checked: false },
+    { id: 5, name: 'Refeição 5', time: '19:30', protein: '', carbs: '', fats: '', calories: '', checked: false },
+    { id: 6, name: 'Refeição 6', time: '22:00', protein: '', carbs: '', fats: '', calories: '', checked: false }
   ])
   const [waterGlasses, setWaterGlasses] = useState(0)
   const [currentDate, setCurrentDate] = useState(new Date().toISOString().split('T')[0])
@@ -106,7 +106,37 @@ function MealPlanner({ user }) {
     const key = `mealPlanner_template_${user}`
     const mealsWithoutChecked = meals.map(({ checked, ...rest }) => rest)
     localStorage.setItem(key, JSON.stringify(mealsWithoutChecked))
-    alert('Template de refeições salvo!')
+    alert('Dieta salva com sucesso!')
+  }
+
+  const addMeal = () => {
+    const newMeal = {
+      id: Date.now(),
+      name: `Refeição ${meals.length + 1}`,
+      time: '12:00',
+      protein: '',
+      carbs: '',
+      fats: '',
+      calories: '',
+      checked: false
+    }
+    setMeals([...meals, newMeal])
+    // Salvar automaticamente
+    setTimeout(() => {
+      saveDayData()
+    }, 100)
+  }
+
+  const removeMeal = (id) => {
+    if (meals.length <= 1) {
+      alert('Você precisa ter pelo menos uma refeição!')
+      return
+    }
+    setMeals(meals.filter(meal => meal.id !== id))
+    // Salvar automaticamente
+    setTimeout(() => {
+      saveDayData()
+    }, 100)
   }
 
   const handleMealChange = (id, field, value) => {
@@ -125,6 +155,11 @@ function MealPlanner({ user }) {
       return meal
     })
     setMeals(updatedMeals)
+    // Salvar automaticamente após 500ms
+    clearTimeout(window.mealPlannerSaveTimeout)
+    window.mealPlannerSaveTimeout = setTimeout(() => {
+      saveDayData()
+    }, 500)
   }
 
   const handleMealCheck = (id) => {
@@ -135,11 +170,17 @@ function MealPlanner({ user }) {
       return meal
     })
     setMeals(updatedMeals)
+    // Salvar automaticamente
+    saveDayData()
   }
 
   const handleWaterGlass = () => {
-    const newGlasses = waterGlasses + 1
+    const newGlasses = Math.min(waterGlasses + 1, 20)
     setWaterGlasses(newGlasses)
+    // Salvar automaticamente
+    setTimeout(() => {
+      saveDayData()
+    }, 100)
   }
 
   const handleTimeChange = (id, time) => {
@@ -263,7 +304,7 @@ function MealPlanner({ user }) {
   return (
     <div className="meal-planner">
       <div className="planner-header">
-        <h2>Planejamento de Refeições</h2>
+        <h2>Minha Dieta</h2>
         <div className="header-actions">
           <input
             type="date"
@@ -350,10 +391,15 @@ function MealPlanner({ user }) {
       {/* Lista de Refeições */}
       <div className="meals-list">
         <div className="meals-header">
-          <h3>Refeições do Dia</h3>
-          <button className="btn-secondary small" onClick={saveTemplate}>
-            Salvar Template
-          </button>
+          <h3>Minha Dieta</h3>
+          <div className="meals-actions">
+            <button className="btn-secondary small" onClick={saveTemplate}>
+              💾 Salvar Dieta
+            </button>
+            <button className="btn-secondary small" onClick={addMeal}>
+              + Adicionar Refeição
+            </button>
+          </div>
         </div>
 
         {meals.map((meal) => (
@@ -371,7 +417,13 @@ function MealPlanner({ user }) {
             <div className="meal-content">
               <div className="meal-header">
                 <div className="meal-name-time">
-                  <span className="meal-name">{meal.name}</span>
+                  <input
+                    type="text"
+                    value={meal.name}
+                    onChange={(e) => handleMealChange(meal.id, 'name', e.target.value)}
+                    className="meal-name-input"
+                    placeholder="Nome da refeição"
+                  />
                   <input
                     type="time"
                     value={meal.time}
@@ -379,6 +431,15 @@ function MealPlanner({ user }) {
                     className="time-input"
                   />
                 </div>
+                {meals.length > 1 && (
+                  <button
+                    className="remove-meal-btn"
+                    onClick={() => removeMeal(meal.id)}
+                    title="Remover refeição"
+                  >
+                    🗑️
+                  </button>
+                )}
               </div>
 
               {editingMeal === meal.id ? (
@@ -406,7 +467,7 @@ function MealPlanner({ user }) {
                   />
                   <input
                     type="number"
-                    placeholder="Calorias"
+                    placeholder="Calorias (opcional)"
                     value={meal.calories}
                     onChange={(e) => handleMealChange(meal.id, 'calories', e.target.value)}
                     className="macro-input-small"
@@ -428,11 +489,12 @@ function MealPlanner({ user }) {
                       <span className="calories-display">{parseFloat(meal.calories) || 0} kcal</span>
                     </>
                   ) : (
-                    <span className="no-data">Sem dados - Clique para editar</span>
+                    <span className="no-data">Clique em ✏️ para adicionar macros</span>
                   )}
                   <button
                     className="edit-btn"
                     onClick={() => setEditingMeal(meal.id)}
+                    title="Editar macros"
                   >
                     ✏️
                   </button>
